@@ -1,0 +1,71 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: black; /* Kolor tła strony */
+    background-image: url('tlo1.png'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    font-family: 'Arial', sans-serif;
+}
+
+.container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* 1. ODSTĘP POD GIFEM */
+.gif_container {
+    margin-bottom: 30px; /* Zmień tę wartość, aby odsunąć GIF od obrazka "czy" */
+}
+
+.gif_container img {
+    margin-top: -250px;
+    max-width: 300px;
+    border-radius: 15px;
+}
+
+/* 2. KONTROLA OBRAZKA "CZY" */
+.czy-image {
+    margin-top: -250px;
+    width: 1200px;        /* TUTAJ ZMIENIASZ WIELKOŚĆ OBRAZKA */
+    height: auto;
+    margin-bottom: 40px; /* ODSTĘP MIĘDZY OBRAZKIEM A PRZYCISKAMI */
+    display: block;
+}
+
+.buttons {
+    display: flex;
+    margin-top: -250px;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.yes-button {
+    font-size: 1.5em;
+    padding: 10px 25px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.no-button {
+    font-size: 1.5em;
+    padding: 10px 25px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+}

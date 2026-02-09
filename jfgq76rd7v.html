@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Zdrapka Bingo - Interaktywna</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('tlo4.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            font-family: 'Segoe UI', sans-serif;
+            color: #4b0082; /* Ciemny fiolet dla lepszej czytelności na różu */
+            transition: 0.5s;
+        }
+
+        .main-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            transition: 0.5s;
+        }
+
+        /* Panele boczne - Styl Glassmorphism */
+        .side-panel {
+            width: 200px;
+            background: rgba(255, 240, 245, 0.85); /* Bardzo jasny róż, lekka przezroczystość */
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(219, 112, 147, 0.3);
+            border: 1px solid rgba(255, 182, 193, 0.5);
+            backdrop-filter: blur(10px); /* Efekt rozmycia pod panelem */
+            transition: all 0.5s ease;
+        }
+
+        /* Narzędzia w rogu */
+        .side-panel.corner-mode {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 180px;
+            z-index: 100;
+            background: rgba(255, 240, 245, 0.7);
+        }
+
+        #container {
+            position: relative;
+            width: 643px; 
+            height: 900px;
+            border: 10px solid #f067ab;
+            border-radius: 10px;
+            box-shadow: 0 0 40px rgba(240, 103, 171, 0.5);
+            background: #000;
+            overflow: hidden;
+            transition: opacity 0.5s;
+        }
+
+        #bingo-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        #scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            touch-action: none;
+        }
+
+        /* Przyciski - Styl Pink Aesthetic */
+        .tool-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #ffb6c1; /* Jasny róż */
+            color: #4b0082;
+            border: 2px solid #ff69b4;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .tool-btn:hover {
+            background: #ff69b4;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.4);
+        }
+
+        .tool-btn.active {
+            background: #db7093; /* PaleVioletRed */
+            color: white;
+            border-color: #c71585;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+        
+        /* Styl dla przycisku podglądu (Orchid) */
+        #view-wallpaper-btn {
+            background: #da70d6;
+            border-color: #ba55d3;
+            color: white;
+            margin-top: 10px;
+        }
+
+        #view-wallpaper-btn:hover {
+            background: #ba55d3;
+        }
+
+        /* Reset - MediumVioletRed */
+        #reset-btn {
+            background: #c71585;
+            border-color: #8b008b;
+            color: white;
+        }
+
+        h3 { 
+            margin-top: 0; 
+            color: #db7093; 
+            text-align: center;
+            border-bottom: 2px solid #ffb6c1;
+            padding-bottom: 10px;
+        }
+
+        p { font-size: 14px; line-height: 1.6; color: #6d4c60; font-weight: 500; }
+
+        hr { border: none; border-top: 1px solid #ffb6c1; margin: 15px 0; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper" id="main-content">
+    <div class="side-panel" id="rules-panel">
+        <h3>Zasady</h3>
+        <p>1. Odsłoń pola używając <b>gąbki</b>.</p>
+        <p>2. Zaznaczaj wygrane pola <b>pisakiem</b>.</p>
+        <p>3. Linia w dowolną stronę to <b>BINGO!</b></p>
+    </div>
+
+    <div id="container">
+        <img src="plansza.png" id="bingo-image" alt="Bingo">
+        <canvas id="scratch-canvas" width="643" height="900"></canvas>
+    </div>
+
+    <div class="side-panel" id="tools-panel">
+        <h3 id="tools-title">Narzędzia</h3>
+        
+        <div id="tools-group">
+            <button class="tool-btn active" id="eraser-btn">🧽 Gąbka (Zdrap)</button>
+            <button class="tool-btn" id="pen-btn">✏️ Pisak (Zaznacz)</button>
+        </div>
+
+        <button class="tool-btn" id="view-wallpaper-btn">🖼️ Zobacz tapetę</button>
+        
+        <div id="reset-group">
+            <hr>
+            <button class="tool-btn" id="reset-btn" onclick="location.reload()">🔄 Reset</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('scratch-canvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('container');
+    const eraserBtn = document.getElementById('eraser-btn');
+    const penBtn = document.getElementById('pen-btn');
+    const viewBtn = document.getElementById('view-wallpaper-btn');
+    const rulesPanel = document.getElementById('rules-panel');
+    const toolsPanel = document.getElementById('tools-panel');
+    const toolsGroup = document.getElementById('tools-group');
+    const resetGroup = document.getElementById('reset-group');
+    const toolsTitle = document.getElementById('tools-title');
+
+    let isDrawing = false;
+    let currentMode = 'eraser';
+    let isWallpaperView = false;
+
+    // Przełączanie widoku
+    viewBtn.onclick = () => {
+        isWallpaperView = !isWallpaperView;
+        if (isWallpaperView) {
+            rulesPanel.classList.add('hidden');
+            container.classList.add('hidden');
+            toolsGroup.classList.add('hidden');
+            resetGroup.classList.add('hidden');
+            toolsPanel.classList.add('corner-mode');
+            viewBtn.innerHTML = "🎯 Powrót do gry";
+            toolsTitle.innerHTML = "Podgląd";
+        } else {
+            rulesPanel.classList.remove('hidden');
+            container.classList.remove('hidden');
+            toolsGroup.classList.remove('hidden');
+            resetGroup.classList.remove('hidden');
+            toolsPanel.classList.remove('corner-mode');
+            viewBtn.innerHTML = "🖼️ Zobacz tapetę";
+            toolsTitle.innerHTML = "Narzędzia";
+        }
+    };
+
+    const spongeCursor = "url('https://cdn-icons-png.flaticon.com/32/3011/3011855.png') 16 16, auto";
+    const penCursor = "crosshair";
+    container.style.cursor = spongeCursor;
+
+    const topImage = new Image();
+    topImage.src = 'zdrapka.png';
+    topImage.onload = () => {
+        ctx.drawImage(topImage, 0, 0, canvas.width, canvas.height);
+    };
+
+    eraserBtn.onclick = () => {
+        currentMode = 'eraser';
+        eraserBtn.classList.add('active');
+        penBtn.classList.remove('active');
+        container.style.cursor = spongeCursor;
+    };
+
+    penBtn.onclick = () => {
+        currentMode = 'pen';
+        penBtn.classList.add('active');
+        eraserBtn.classList.remove('active');
+        container.style.cursor = penCursor;
+    };
+
+    function handleAction(e) {
+        if (!isDrawing || isWallpaperView) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+        const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+        if (currentMode === 'eraser') {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = 'rgba(255, 20, 147, 0.5)'; // Intensywny różowy pisak
+            ctx.lineWidth = 12;
+            ctx.lineCap = 'round';
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+    }
+
+    canvas.addEventListener('mousedown', (e) => { 
+        if(isWallpaperView) return;
+        isDrawing = true; 
+        if(currentMode === 'pen') {
+            const rect = canvas.getBoundingClientRect();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+        handleAction(e);
+    });
+
+    window.addEventListener('mouseup', () => { isDrawing = false; ctx.beginPath(); });
+    canvas.addEventListener('mousemove', handleAction);
+    canvas.addEventListener('touchstart', (e) => { if(!isWallpaperView) { isDrawing = true; e.preventDefault(); handleAction(e.touches[0]); } });
+    canvas.addEventListener('touchend', () => isDrawing = false);
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handleAction(e.touches[0]); });
+</script>
+
+</body>
+</html>
