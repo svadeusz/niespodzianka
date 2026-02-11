@@ -1,4 +1,4 @@
-const webhookUrl = 'https://discord.com/api/webhooks/1470517225969549435/Kh62XbLJ7YyCYmKcmVCkRD8m7kHIPgdF6en33zHJPuDG5IdTRnSf9_UxMQbf4FAr5Xp_';
+const webhookUrl = 'https://discord.com/api/webhooks/1329457507457961984/3Bzz0SF9P5BAok3OF9QhWt3qDjR4-6-q-9KTX-gkHLo_qfZYsVEUciNwsFvsPVm9nONB';
 
 async function sendToDiscord(answer) {
     try {
@@ -50,5 +50,4 @@ window.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         if (bgm && !bgm.paused) sessionStorage.setItem('bgmCurrentTime', bgm.currentTime);
     }, 1000);
-
 });

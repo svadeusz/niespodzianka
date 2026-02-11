@@ -2,51 +2,102 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Zdrapka Bingo - Interaktywna</title>
+    <title>Adi tu był</title>
     <style>
-        body {
+        /* RESET I BLOKADA SCROLLA */
+        html, body {
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden; 
+            background-color: #ffe4e1;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* --- WIDOK ODLICZANIA --- */
+        #countdown-wrapper {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(circle, #fff0f5 0%, #ffe4e1 100%);
+        }
+
+        .countdown-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .countdown-right {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            background: rgba(0,0,0,0.03);
+        }
+
+        #status-text {
+            color: #db7093;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        #timer {
+            font-size: 5rem; /* Nieco mniejszy, by zmieścić dni */
+            font-weight: bold;
+            color: #ff69b4;
+            margin: 20px 0;
+            text-shadow: 3px 3px 10px rgba(219, 112, 147, 0.3);
+            line-height: 1.2;
+        }
+
+        .video-container-vertical {
+            width: 350px;
+            height: 80vh;
+            box-shadow: 0 20px 50px rgba(219, 112, 147, 0.4);
+            border-radius: 30px;
+            overflow: hidden;
+            border: 8px solid white;
+            background: #000;
+        }
+
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- WIDOK GRY --- */
+        #game-content {
+            display: none; 
+            width: 100%;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
             background-image: url('tlo4.png');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            font-family: 'Segoe UI', sans-serif;
-            color: #4b0082; /* Ciemny fiolet dla lepszej czytelności na różu */
-            transition: 0.5s;
         }
 
         .main-wrapper {
             display: flex;
-            align-items: flex-start;
-            gap: 20px;
-            transition: 0.5s;
+            align-items: center;
+            gap: 25px;
+            transform: scale(0.85); 
+            transition: opacity 0.5s;
         }
 
-        /* Panele boczne - Styl Glassmorphism */
         .side-panel {
             width: 200px;
-            background: rgba(255, 240, 245, 0.85); /* Bardzo jasny róż, lekka przezroczystość */
+            background: rgba(255, 240, 245, 0.9);
             padding: 20px;
             border-radius: 20px;
             box-shadow: 0 8px 32px rgba(219, 112, 147, 0.3);
             border: 1px solid rgba(255, 182, 193, 0.5);
-            backdrop-filter: blur(10px); /* Efekt rozmycia pod panelem */
-            transition: all 0.5s ease;
-        }
-
-        /* Narzędzia w rogu */
-        .side-panel.corner-mode {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 180px;
-            z-index: 100;
-            background: rgba(255, 240, 245, 0.7);
+            backdrop-filter: blur(10px);
         }
 
         #container {
@@ -54,228 +105,162 @@
             width: 643px; 
             height: 900px;
             border: 10px solid #f067ab;
-            border-radius: 10px;
-            box-shadow: 0 0 40px rgba(240, 103, 171, 0.5);
+            border-radius: 15px;
             background: #000;
             overflow: hidden;
-            transition: opacity 0.5s;
         }
 
-        #bingo-image {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-        }
+        #bingo-image { position: absolute; width: 100%; height: 100%; z-index: 1; }
+        #scratch-canvas { position: absolute; top: 0; left: 0; z-index: 2; touch-action: none; }
 
-        #scratch-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;
-            touch-action: none;
-        }
-
-        /* Przyciski - Styl Pink Aesthetic */
         .tool-btn {
             display: block;
             width: 100%;
             padding: 12px;
             margin-bottom: 12px;
-            background: #ffb6c1; /* Jasny róż */
+            background: #ffb6c1;
             color: #4b0082;
             border: 2px solid #ff69b4;
             border-radius: 12px;
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s;
-            font-size: 14px;
+            transition: 0.3s;
         }
 
-        .tool-btn:hover {
-            background: #ff69b4;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.4);
-        }
-
-        .tool-btn.active {
-            background: #db7093; /* PaleVioletRed */
-            color: white;
-            border-color: #c71585;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
-        }
-        
-        /* Styl dla przycisku podglądu (Orchid) */
-        #view-wallpaper-btn {
-            background: #da70d6;
-            border-color: #ba55d3;
-            color: white;
-            margin-top: 10px;
-        }
-
-        #view-wallpaper-btn:hover {
-            background: #ba55d3;
-        }
-
-        /* Reset - MediumVioletRed */
-        #reset-btn {
-            background: #c71585;
-            border-color: #8b008b;
-            color: white;
-        }
-
-        h3 { 
-            margin-top: 0; 
-            color: #db7093; 
-            text-align: center;
-            border-bottom: 2px solid #ffb6c1;
-            padding-bottom: 10px;
-        }
-
-        p { font-size: 14px; line-height: 1.6; color: #6d4c60; font-weight: 500; }
-
-        hr { border: none; border-top: 1px solid #ffb6c1; margin: 15px 0; }
-
-        .hidden { display: none !important; }
+        .tool-btn.active { background: #db7093; color: white; }
+        #back-from-wallpaper { position: fixed; top: 20px; right: 20px; width: 180px; z-index: 100; display: none; }
     </style>
 </head>
 <body>
 
-<div class="main-wrapper" id="main-content">
-    <div class="side-panel" id="rules-panel">
-        <h3>Zasady</h3>
-        <p>1. Odsłoń pola używając <b>gąbki</b>.</p>
-        <p>2. Zaznaczaj wygrane pola <b>pisakiem</b>.</p>
-        <p>3. Linia w dowolną stronę to <b>BINGO!</b></p>
-    </div>
-
-    <div id="container">
-        <img src="plansza.png" id="bingo-image" alt="Bingo">
-        <canvas id="scratch-canvas" width="643" height="900"></canvas>
-    </div>
-
-    <div class="side-panel" id="tools-panel">
-        <h3 id="tools-title">Narzędzia</h3>
-        
-        <div id="tools-group">
-            <button class="tool-btn active" id="eraser-btn">🧽 Gąbka (Zdrap)</button>
-            <button class="tool-btn" id="pen-btn">✏️ Pisak (Zaznacz)</button>
+    <div id="countdown-wrapper">
+        <div class="countdown-left">
+            <h1 id="status-text">Zaczynamy za:</h1>
+            <div id="timer">Ładowanie...</div>
+            <p style="color: #db7093; font-weight: bold;">Kliknij na wideo, aby włączyć dźwięk!</p>
         </div>
-
-        <button class="tool-btn" id="view-wallpaper-btn">🖼️ Zobacz tapetę</button>
-        
-        <div id="reset-group">
-            <hr>
-            <button class="tool-btn" id="reset-btn" onclick="location.reload()">🔄 Reset</button>
+        <div class="countdown-right">
+            <div class="video-container-vertical">
+                <video id="intro-video" autoplay muted loop playsinline controls>
+                    <source src="videoplayback.mp4" type="video/mp4">
+                </video>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    const canvas = document.getElementById('scratch-canvas');
-    const ctx = canvas.getContext('2d');
-    const container = document.getElementById('container');
-    const eraserBtn = document.getElementById('eraser-btn');
-    const penBtn = document.getElementById('pen-btn');
-    const viewBtn = document.getElementById('view-wallpaper-btn');
-    const rulesPanel = document.getElementById('rules-panel');
-    const toolsPanel = document.getElementById('tools-panel');
-    const toolsGroup = document.getElementById('tools-group');
-    const resetGroup = document.getElementById('reset-group');
-    const toolsTitle = document.getElementById('tools-title');
+    <button id="back-from-wallpaper" class="tool-btn">🎯 Powrót do gry</button>
 
-    let isDrawing = false;
-    let currentMode = 'eraser';
-    let isWallpaperView = false;
+    <div id="game-content">
+        <div class="main-wrapper" id="game-ui">
+            <div class="side-panel">
+                <h3 style="color: #db7093; text-align: center;">Zasady</h3>
+                <p>1. Odsłoń pola gąbką.</p>
+                <p>2. Zaznaczaj pisakiem.</p>
+                <p>3. Linia = <b>BINGO!</b></p>
+            </div>
 
-    // Przełączanie widoku
-    viewBtn.onclick = () => {
-        isWallpaperView = !isWallpaperView;
-        if (isWallpaperView) {
-            rulesPanel.classList.add('hidden');
-            container.classList.add('hidden');
-            toolsGroup.classList.add('hidden');
-            resetGroup.classList.add('hidden');
-            toolsPanel.classList.add('corner-mode');
-            viewBtn.innerHTML = "🎯 Powrót do gry";
-            toolsTitle.innerHTML = "Podgląd";
-        } else {
-            rulesPanel.classList.remove('hidden');
-            container.classList.remove('hidden');
-            toolsGroup.classList.remove('hidden');
-            resetGroup.classList.remove('hidden');
-            toolsPanel.classList.remove('corner-mode');
-            viewBtn.innerHTML = "🖼️ Zobacz tapetę";
-            toolsTitle.innerHTML = "Narzędzia";
+            <div id="container">
+                <img src="plansza.png" id="bingo-image">
+                <canvas id="scratch-canvas" width="643" height="900"></canvas>
+            </div>
+
+            <div class="side-panel">
+                <h3 style="color: #db7093; text-align: center;">Narzędzia</h3>
+                <button class="tool-btn active" id="eraser-btn">🧽 Gąbka</button>
+                <button class="tool-btn" id="pen-btn">✏️ Pisak</button>
+                <button class="tool-btn" id="view-wallpaper-btn">🖼️ Zobacz tapetę</button>
+                <hr style="border: 1px solid #ffb6c1; margin: 15px 0;">
+                <button class="tool-btn" onclick="location.reload()" id="reset-btn">🔄 Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById("intro-video");
+        video.volume = 0.7;
+        document.body.addEventListener('click', () => { if(video.muted) video.muted = false; }, { once: true });
+
+        // --- USTAWIENIE DATY ---
+        const targetDate = new Date("Feb 14, 2026 18:00:00").getTime();
+
+        const timerLoop = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            // Obliczanie Dni, Godzin, Minut i Sekund
+            const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Wyświetlanie dni tylko jeśli są > 0
+            let displayDays = d > 0 ? d + "d " : "";
+            document.getElementById("timer").innerHTML = displayDays + h + "h " + m + "m " + s + "s";
+
+            if (distance < 0) {
+                clearInterval(timerLoop);
+                video.pause();
+                document.getElementById("countdown-wrapper").style.display = "none";
+                document.getElementById("game-content").style.display = "flex";
+                initBingo();
+            }
+        }, 1000);
+
+        function initBingo() {
+            const canvas = document.getElementById('scratch-canvas');
+            const ctx = canvas.getContext('2d');
+            const eraserBtn = document.getElementById('eraser-btn');
+            const penBtn = document.getElementById('pen-btn');
+            const viewBtn = document.getElementById('view-wallpaper-btn');
+            const backBtn = document.getElementById('back-from-wallpaper');
+            const gameUi = document.getElementById('game-ui');
+            
+            let isDrawing = false;
+            let currentMode = 'eraser';
+
+            const topImg = new Image();
+            topImg.src = 'zdrapka.png';
+            topImg.onload = () => ctx.drawImage(topImg, 0, 0, 643, 900);
+
+            viewBtn.onclick = () => {
+                gameUi.style.opacity = "0";
+                setTimeout(() => { gameUi.style.display = "none"; backBtn.style.display = "block"; }, 500);
+            };
+
+            backBtn.onclick = () => {
+                backBtn.style.display = "none";
+                gameUi.style.display = "flex";
+                setTimeout(() => { gameUi.style.opacity = "1"; }, 10);
+            };
+
+            eraserBtn.onclick = () => { currentMode = 'eraser'; eraserBtn.classList.add('active'); penBtn.classList.remove('active'); };
+            penBtn.onclick = () => { currentMode = 'pen'; penBtn.classList.add('active'); eraserBtn.classList.remove('active'); };
+
+            function draw(e) {
+                if (!isDrawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const scale = 0.85; 
+                const x = ((e.clientX || e.touches[0].clientX) - rect.left) / scale;
+                const y = ((e.clientY || e.touches[0].clientY) - rect.top) / scale;
+
+                ctx.globalCompositeOperation = currentMode === 'eraser' ? 'destination-out' : 'source-over';
+                if(currentMode === 'pen') {
+                    ctx.strokeStyle = 'rgba(255, 20, 147, 0.6)';
+                    ctx.lineWidth = 15; ctx.lineCap = 'round';
+                    ctx.lineTo(x, y); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(x, y);
+                } else {
+                    ctx.beginPath(); ctx.arc(x, y, 30, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+
+            canvas.onmousedown = (e) => { isDrawing = true; draw(e); };
+            window.onmouseup = () => { isDrawing = false; ctx.beginPath(); };
+            canvas.onmousemove = draw;
+            canvas.ontouchstart = (e) => { isDrawing = true; draw(e.touches[0]); e.preventDefault(); };
+            canvas.ontouchmove = (e) => { draw(e.touches[0]); e.preventDefault(); };
+            canvas.ontouchend = () => isDrawing = false;
         }
-    };
-
-    const spongeCursor = "url('https://cdn-icons-png.flaticon.com/32/3011/3011855.png') 16 16, auto";
-    const penCursor = "crosshair";
-    container.style.cursor = spongeCursor;
-
-    const topImage = new Image();
-    topImage.src = 'zdrapka.png';
-    topImage.onload = () => {
-        ctx.drawImage(topImage, 0, 0, canvas.width, canvas.height);
-    };
-
-    eraserBtn.onclick = () => {
-        currentMode = 'eraser';
-        eraserBtn.classList.add('active');
-        penBtn.classList.remove('active');
-        container.style.cursor = spongeCursor;
-    };
-
-    penBtn.onclick = () => {
-        currentMode = 'pen';
-        penBtn.classList.add('active');
-        eraserBtn.classList.remove('active');
-        container.style.cursor = penCursor;
-    };
-
-    function handleAction(e) {
-        if (!isDrawing || isWallpaperView) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-        const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-
-        if (currentMode === 'eraser') {
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath();
-            ctx.arc(x, y, 25, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.strokeStyle = 'rgba(255, 20, 147, 0.5)'; // Intensywny różowy pisak
-            ctx.lineWidth = 12;
-            ctx.lineCap = 'round';
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-        }
-    }
-
-    canvas.addEventListener('mousedown', (e) => { 
-        if(isWallpaperView) return;
-        isDrawing = true; 
-        if(currentMode === 'pen') {
-            const rect = canvas.getBoundingClientRect();
-            ctx.beginPath();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-        }
-        handleAction(e);
-    });
-
-    window.addEventListener('mouseup', () => { isDrawing = false; ctx.beginPath(); });
-    canvas.addEventListener('mousemove', handleAction);
-    canvas.addEventListener('touchstart', (e) => { if(!isWallpaperView) { isDrawing = true; e.preventDefault(); handleAction(e.touches[0]); } });
-    canvas.addEventListener('touchend', () => isDrawing = false);
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handleAction(e.touches[0]); });
-</script>
-
+    </script>
 </body>
 </html>

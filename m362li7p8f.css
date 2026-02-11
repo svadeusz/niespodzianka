@@ -27,13 +27,13 @@ body {
 
 .gif_container img {
     margin-top: -250px;
-    max-width: 300px;
+    max-width: 400px;
     border-radius: 15px;
 }
 
 /* 2. KONTROLA OBRAZKA "CZY" */
 .czy-image {
-    margin-top: -250px;
+    margin-top: -50px;
     width: 1200px;        /* TUTAJ ZMIENIASZ WIELKOŚĆ OBRAZKA */
     height: auto;
     margin-bottom: 40px; /* ODSTĘP MIĘDZY OBRAZKIEM A PRZYCISKAMI */
@@ -42,7 +42,7 @@ body {
 
 .buttons {
     display: flex;
-    margin-top: -250px;
+    margin-top: -30px;
     gap: 20px;
     align-items: center;
     justify-content: center;
